@@ -54,6 +54,27 @@
             DSDontWriteUSBStores = true;
           };
         };
+        dock = {
+          minimize-to-application = true;
+          mru-spaces = false;
+          orientation = "left";
+          persistent-apps = [
+            { app = "/Users/${user}/Applications/Chrome Apps.localized/Google Gemini.app/"; }
+            { app = "/Applications/Antigravity.app/"; }
+            { app = "/Users/${user}/Applications/Chrome Apps.localized/Google Calendar.app/"; }
+            { app = "/Applications/Google Chrome.app/"; }
+            { app = "/Applications/GitHub Desktop.app/"; }
+            { app = "/Users/${user}/Applications/Chrome Apps.localized/Gmail.app/"; }
+            { app = "/Users/${user}/Applications/Chrome Apps.localized/Google Keep.app/"; }
+            { app = "/Users/${user}/Applications/Chrome Apps.localized/Messages.app/"; }
+            { app = "/Applications/Obsidian.app/"; }
+            { app = "/Applications/Proton Mail.app/"; }
+            { app = "/Users/${user}/Applications/Chrome Apps.localized/Google Tasks.app/"; }
+            { app = "/System/Applications/Utilities/Terminal.app/"; }
+          ];
+          show-recents = false;
+          wvous-br-corner = 1;
+        };
       };
 
       users.users.${user}.home = "${userHome}";
@@ -75,8 +96,7 @@
     darwinConfigurations."main" = nix-darwin.lib.darwinSystem {
       modules = [
         configuration
-        ./brew.nix
-        ./cli.nix
+        ./apps.nix
         home-manager.darwinModules.home-manager
         {
           home-manager.extraSpecialArgs = { inherit user userHome; };
