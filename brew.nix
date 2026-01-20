@@ -1,6 +1,10 @@
 { ... }: {
   homebrew = {
-    onActivation.autoUpdate = true;
+    onActivation = {
+      autoUpdate = true;
+      cleanup = "zap";
+      upgrade = true;
+    };
     enable = true;
     brews = [ # CLI Applications
       "docker"
@@ -13,7 +17,7 @@
       "nmap"
       "node"
       "npm"
-      # "proxmark3"
+      "proxmark3"
       "ripgrep"
       "speedtest-cli"
       "unbound"
@@ -31,8 +35,8 @@
       "browseros"
       "burp-suite"
       "chatgpt-atlas"
-      "chirp"
       "cold-turkey-blocker"
+      "comet"
       "discord"
       "docker-desktop"
       "elgato-stream-deck"
@@ -63,7 +67,6 @@
       "transmission"
       "vlc"
       "vnc-viewer"
-      "wireshark"
       "wireshark-app"
     ];
     masApps = { # Mac App Store Applications

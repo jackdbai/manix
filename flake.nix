@@ -11,41 +11,40 @@
       url = "github:nix-darwin/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
+    homebrew-core = {
+      url = "github:Homebrew/homebrew-core";
+      flake = false;
+    };
+    homebrew-cask = {
+      url = "github:Homebrew/homebrew-cask";
+      flake = false;
+    };
+    proxmark = {
+      url = "github:proxmark/homebrew-proxmark3";
+      flake = false;
+    };
   };
 
-  outputs = inputs@{ self, nix-darwin, nixpkgs, home-manager }:
+  outputs = inputs@{ self, nix-darwin, nixpkgs, home-manager, nix-homebrew, homebrew-core, homebrew-cask, proxmark }:
   let
     user = "jack";
     userHome = "/Users/${user}";
     configuration = { pkgs, ... }: {
-      # Necessary for using flakes on this system.
       nix.settings.experimental-features = "nix-command flakes";
-
-      # Set Git commit hash for darwin-version.
       system.configurationRevision = self.rev or self.dirtyRev or null;
-
-      # Used for backwards compatibility, please read the changelog before changing.
-      # $ darwin-rebuild changelog
       system.stateVersion = 6;
-
-      # The platform the configuration will be used on.
       nixpkgs = {
         hostPlatform = "aarch64-darwin";
         config.allowUnfree = true;
       };
-
-      # Set primary user
       system.primaryUser = "${user}";
-
-      # Sane System Defaults
       system.defaults = {
         CustomUserPreferences = {
-          # Disable Siri
           "com.apple.Siri" = {
             "UAProfileCheckingStatus" = 0;
             "siriEnabled" = 0;
           };
-          # Disable personalized ads
           "com.apple.AdLib" = {
             allowApplePersonalizedAdvertising = false;
           };
@@ -59,28 +58,34 @@
           mru-spaces = false;
           orientation = "left";
           persistent-apps = [
-            { app = "/Users/${user}/Applications/Chrome Apps.localized/Google Gemini.app/"; }
-            { app = "/Applications/Antigravity.app/"; }
-            { app = "/Users/${user}/Applications/Chrome Apps.localized/Google Calendar.app/"; }
-            { app = "/Applications/Google Chrome.app/"; }
-            { app = "/Applications/GitHub Desktop.app/"; }
-            { app = "/Users/${user}/Applications/Chrome Apps.localized/Gmail.app/"; }
-            { app = "/Users/${user}/Applications/Chrome Apps.localized/Google Keep.app/"; }
-            { app = "/Users/${user}/Applications/Chrome Apps.localized/Messages.app/"; }
-            { app = "/Applications/Obsidian.app/"; }
-            { app = "/Applications/Proton Mail.app/"; }
-            { app = "/Users/${user}/Applications/Chrome Apps.localized/Google Tasks.app/"; }
-            { app = "/System/Applications/Utilities/Terminal.app/"; }
+            "/Users/${user}/Applications/Chrome Apps.localized/Google Gemini.app/"
+            "/Applications/Antigravity.app/"
+            "/Users/${user}/Applications/Chrome Apps.localized/Google Calendar.app/"
+            "/Applications/Google Chrome.app/"
+            "/Applications/GitHub Desktop.app/"
+            "/Users/${user}/Applications/Chrome Apps.localized/Gmail.app/"
+            "/Users/${user}/Applications/Chrome Apps.localized/Google Keep.app/"
+            "/Users/${user}/Applications/Chrome Apps.localized/Messages.app/"
+            "/Applications/Obsidian.app/"
+            "/Applications/Proton Mail.app/"
+            "/Users/${user}/Applications/Chrome Apps.localized/Google Tasks.app/"
+            "/System/Applications/Utilities/Terminal.app/"
           ];
           show-recents = false;
           wvous-br-corner = 1;
         };
+        finder = {
+          FXEnableExtensionChangeWarning = false;
+          FXPreferredViewStyle = "Nlsv";
+          NewWindowTarget = "Home";
+          _FXShowPosixPathInTitle = true;
+          _FXSortFoldersFirst = true;
+          _FXSortFoldersFirstOnDesktop = true;
+          };
       };
 
       users.users.${user}.home = "${userHome}";
 
-      # Ensure Rosetta 2 is installed on Apple Silicon
-      # Then enable x86-64 emulation
       system.activationScripts.extraActivation.text = ''
         softwareupdate --install-rosetta --agree-to-license
       '';
@@ -88,15 +93,16 @@
         extra-platforms = x86_64-darwin aarch64-darwin
       '';
 
+      environment.systemPackages = with pkgs; [
+        chirp
+      ];
     };
   in
   {
-    # Build darwin flake using:
-    # $ darwin-rebuild build --flake .#main
     darwinConfigurations."main" = nix-darwin.lib.darwinSystem {
       modules = [
         configuration
-        ./apps.nix
+        ./brew.nix
         home-manager.darwinModules.home-manager
         {
           home-manager.extraSpecialArgs = { inherit user userHome; };
@@ -104,6 +110,24 @@
           home-manager.useUserPackages = true;
           home-manager.users.${user} = import ./home.nix;
         }
+        nix-homebrew.darwinModules.nix-homebrew
+        {
+          nix-homebrew = {
+            enable = true;
+            enableRosetta = true;
+            user = "${user}";
+            autoMigrate = true;
+            taps = {
+              "homebrew/homebrew-core" = homebrew-core;
+              "homebrew/homebrew-cask" = homebrew-cask;
+              "proxmark/homebrew-proxmark3" = proxmark;
+            };
+            mutableTaps = false;
+          };
+        }
+        ({config, ...}: {
+          homebrew.taps = builtins.attrNames config.nix-homebrew.taps;
+        })
       ];
     };
   };
