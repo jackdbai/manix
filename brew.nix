@@ -9,6 +9,7 @@
     brews = [ # CLI Applications
       "docker"
       "docker-compose"
+      "ffmpeg"
       "gemini-cli"
       "gh"
       "hugo"
@@ -17,7 +18,8 @@
       "nmap"
       "node"
       "npm"
-      "proxmark3"
+      "node@22"
+      # "proxmark3"
       "ripgrep"
       "speedtest-cli"
       "unbound"
@@ -32,11 +34,11 @@
       "android-studio"
       "antigravity"
       "audacity"
+      "brave-browser"
       "browseros"
       "burp-suite"
-      "chatgpt-atlas"
+      # "clawdbot"
       "cold-turkey-blocker"
-      "comet"
       "discord"
       "docker-desktop"
       "elgato-stream-deck"
@@ -70,9 +72,7 @@
       "wireshark-app"
     ];
     masApps = { # Mac App Store Applications
-      # "Microsoft Remote Desktop" = 1295203466;
-      # "Slack for Desktop" = 803453959;
-      # Xcode = 497799835;
+      "ScreenZen- Screen Time Control" = 1541027222;
     };
   };
 }

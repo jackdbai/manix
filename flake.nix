@@ -6,6 +6,15 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    homebrew-cask = {
+      url = "github:Homebrew/homebrew-cask";
+      flake = false;
+    };
+    hosts.url = "github:StevenBlack/hosts";
+    proxmark = {
+      url = "github:proxmark/homebrew-proxmark3";
+      flake = false;
+    };
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/master";
@@ -16,17 +25,10 @@
       url = "github:Homebrew/homebrew-core";
       flake = false;
     };
-    homebrew-cask = {
-      url = "github:Homebrew/homebrew-cask";
-      flake = false;
-    };
-    proxmark = {
-      url = "github:proxmark/homebrew-proxmark3";
-      flake = false;
-    };
+    nix-openclaw.url = "github:openclaw/nix-openclaw";
   };
 
-  outputs = inputs@{ self, nix-darwin, nixpkgs, home-manager, nix-homebrew, homebrew-core, homebrew-cask, proxmark }:
+  outputs = inputs@{ self, home-manager, homebrew-cask, homebrew-core, hosts, nix-darwin, nix-homebrew, nix-openclaw, nixpkgs, proxmark }:
   let
     user = "jack";
     userHome = "/Users/${user}";
@@ -40,7 +42,7 @@
       };
       system.primaryUser = "${user}";
       system.defaults = {
-        CustomUserPreferences = {
+        CustomUserPreferences = { # Custom user preferences
           "com.apple.Siri" = {
             "UAProfileCheckingStatus" = 0;
             "siriEnabled" = 0;
@@ -53,7 +55,7 @@
             DSDontWriteUSBStores = true;
           };
         };
-        dock = {
+        dock = { # Custom dock settings
           minimize-to-application = true;
           mru-spaces = false;
           orientation = "left";
@@ -65,7 +67,9 @@
             "/Applications/GitHub Desktop.app/"
             "/Users/${user}/Applications/Chrome Apps.localized/Gmail.app/"
             "/Users/${user}/Applications/Chrome Apps.localized/Google Keep.app/"
+            "/Users/${user}/Applications/Chrome Apps.localized/GroupMe.app/"
             "/Users/${user}/Applications/Chrome Apps.localized/Messages.app/"
+            "/System/Applications/Messages.app"
             "/Applications/Obsidian.app/"
             "/Applications/Proton Mail.app/"
             "/Users/${user}/Applications/Chrome Apps.localized/Google Tasks.app/"
@@ -74,7 +78,7 @@
           show-recents = false;
           wvous-br-corner = 1;
         };
-        finder = {
+        finder = { # Custom finder settings
           FXEnableExtensionChangeWarning = false;
           FXPreferredViewStyle = "Nlsv";
           NewWindowTarget = "Home";
@@ -93,7 +97,7 @@
         extra-platforms = x86_64-darwin aarch64-darwin
       '';
 
-      environment.systemPackages = with pkgs; [
+      environment.systemPackages = with pkgs; [ # Install applications that are not available through Homebrew
         chirp
       ];
     };
@@ -103,6 +107,7 @@
       modules = [
         configuration
         ./brew.nix
+        # nix-openclaw.homeManagerModules.default
         home-manager.darwinModules.home-manager
         {
           home-manager.extraSpecialArgs = { inherit user userHome; };

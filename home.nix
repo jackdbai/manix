@@ -20,7 +20,9 @@
       adbplayenable = "adb shell pm enable-user --user 0 com.android.vending";
       cleanup = "sudo nix-collect-garbage -d";
       rebuild = "sudo darwin-rebuild switch --flake ~/Documents/GitHub/manix#main";
-      update = "sudo nix flake update ~/Documents/GitHub/manix";
+      update = "sudo nix flake update --flake ~/Documents/GitHub/manix";
+      ytdl = "yt-dlp -t mp4";
+      ytdl2 = "yt-dlp -f bestvideo+bestaudio --merge-output-format mp4";
     };
   };
 }
